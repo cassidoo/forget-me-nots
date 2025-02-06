@@ -1,0 +1,77 @@
+body {
+	font-size: 5em;
+}
+
+.container {
+	width: 2000px;
+	padding: 16px;
+}
+
+h1 {
+	font-size: 20px;
+	margin-bottom: 16px;
+}
+
+.hidden {
+	display: none;
+}
+
+.button {
+	background-color: #4caf50;
+	color: white;
+	padding: 8px 16px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	margin: 8px 0;
+}
+
+.button-secondary {
+	background-color: #9e9e9e;
+}
+
+.button:hover {
+	opacity: 0.8;
+}
+
+.form-group {
+	margin-bottom: 12px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select {
+	width: 100%;
+	padding: 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.reminder-item {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	margin-bottom: 8px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.delete-btn {
+	background-color: #f44336;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	padding: 4px 8px;
+	cursor: pointer;
+}
+
+.empty-state {
+	text-align: center;
+	color: #666;
+	padding: 16px;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Forget-me-nots</title>
+		<link rel="stylesheet" type="text/css" href="popup.css" />
+	</head>
+	<body>
+		<div class="container">
+			<h1>Forget-me-nots</h1>
+
+			<div id="reminders-list">
+				<!-- Reminders will be populated here -->
+			</div>
+
+			<button id="add-reminder-btn" class="button">Add New Reminder</button>
+
+			<div id="add-reminder-form" class="hidden">
+				<h2>Add New Reminder</h2>
+				<form id="reminder-form">
+					<div class="form-group">
+						<label for="reminder-text">What to remember:</label>
+						<input type="text" id="reminder-text" required />
+					</div>
+
+					<div class="form-group">
+						<label for="time-window-start">Time Window Start:</label>
+						<input type="time" id="time-window-start" required />
+					</div>
+
+					<div class="form-group">
+						<label for="time-window-end">Time Window End:</label>
+						<input type="time" id="time-window-end" required />
+					</div>
+
+					<div class="form-group">
+						<label for="cadence">Repeat Every (minutes):</label>
+						<input type="number" id="cadence" value="30" min="1" required />
+					</div>
+
+					<button type="submit" class="button">Save Reminder</button>
+					<button type="button" id="cancel-btn" class="button button-secondary">
+						Cancel
+					</button>
+				</form>
+			</div>
+		</div>
+		<script src="popup.js"></script>
+	</body>
+</html>
