@@ -14,8 +14,7 @@
 		}
 	},
 	"background": {
-		"service_worker": "background.js",
-		"type": "module"
+		"service_worker": "background.js"
 	},
 	"icons": {
 		"16": "icons/icon16.png",
