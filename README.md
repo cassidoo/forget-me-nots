@@ -1,4 +1,4 @@
-# Forget Me Nots
+# Forget Me Nots 🌸
 
 A browser extension for helping you remember things that you should not forget via small, regular reminders at the top of your screen.
 
