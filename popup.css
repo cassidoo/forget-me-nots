@@ -87,3 +87,21 @@ h1 {
 	border-radius: 3px;
 	white-space: nowrap;
 }
+
+.notification-banner {
+	position: fixed;
+	top: -100px;
+	left: 0;
+	right: 0;
+	background: #4caf50;
+	color: white;
+	padding: 12px;
+	text-align: center;
+	transition: top 0.3s ease-in-out;
+	z-index: 1000;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notification-banner.show {
+	top: 0;
+}

@@ -74,6 +74,34 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
+// Replace window.addEventListener with chrome.runtime.onMessage
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	console.log("Received message:", message);
+	if (message.type === "SHOW_REMINDER") {
+		console.log("Showing banner for:", message.reminder.text);
+		showBanner(message.reminder.text);
+	}
+	sendResponse({}); // Acknowledge receipt
+	return true; // Keep the message channel open for async responses
+});
+
+function showBanner(text) {
+	const banner = document.getElementById("notification-banner");
+	if (!banner) {
+		console.error("Banner element not found");
+		return;
+	}
+
+	console.log("Displaying banner with text:", text);
+	banner.textContent = text;
+	banner.classList.add("show");
+
+	// Remove the banner after 5 seconds
+	setTimeout(() => {
+		banner.classList.remove("show");
+	}, 5000);
+}
+
 // Function to load and display reminders
 async function loadReminders() {
 	const remindersList = document.getElementById("reminders-list");
@@ -125,49 +153,43 @@ function updateCountdowns() {
 function updateSingleCountdown(element) {
 	const start = element.dataset.start;
 	const end = element.dataset.end;
-	const cadence = parseInt(element.dataset.cadence);
+	const cadence = parseFloat(element.dataset.cadence);
 
 	const now = new Date();
-	const currentMinutes = now.getHours() * 60 + now.getMinutes();
-	const currentSeconds = now.getSeconds();
+	const currentTime =
+		(now.getHours() * 60 + now.getMinutes()) * 60 + now.getSeconds();
 
 	const [startHours, startMinutes] = start.split(":");
+	const startTimeSeconds =
+		(parseInt(startHours) * 60 + parseInt(startMinutes)) * 60;
+
 	const [endHours, endMinutes] = end.split(":");
-	const startTime = parseInt(startHours) * 60 + parseInt(startMinutes);
-	const endTime = parseInt(endHours) * 60 + parseInt(endMinutes);
+	const endTimeSeconds = (parseInt(endHours) * 60 + parseInt(endMinutes)) * 60;
 
-	let nextReminder;
-	let seconds = 60 - currentSeconds;
+	const cadenceSeconds = cadence * 60;
+	let timeToNext;
 
-	if (currentMinutes < startTime) {
+	if (currentTime < startTimeSeconds) {
 		// Before start time
-		nextReminder = startTime - currentMinutes - 1;
-		seconds = 60 - currentSeconds;
-	} else if (currentMinutes >= endTime) {
-		// After end time, wait for next day
-		nextReminder = 24 * 60 - currentMinutes + startTime - 1;
-		seconds = 60 - currentSeconds;
+		timeToNext = startTimeSeconds - currentTime;
+	} else if (currentTime >= endTimeSeconds) {
+		// After end time - show time until next day's start
+		timeToNext = 24 * 3600 - currentTime + startTimeSeconds;
 	} else {
 		// Within time window
-		const minutesSinceStart = currentMinutes - startTime;
-		const nextInterval = Math.ceil((minutesSinceStart + 1) / cadence) * cadence;
-		nextReminder = startTime + nextInterval - currentMinutes - 1;
-
-		if (nextReminder < 0) {
-			nextReminder = 0;
-			seconds = 60 - currentSeconds;
-		}
+		const secondsSinceStart = currentTime - startTimeSeconds;
+		const nextInterval =
+			Math.ceil(secondsSinceStart / cadenceSeconds) * cadenceSeconds;
+		timeToNext = startTimeSeconds + nextInterval - currentTime;
 	}
 
-	// Convert to human-readable format
-	const hours = Math.floor(nextReminder / 60);
-	const minutes = nextReminder % 60;
-	const timeStr =
-		nextReminder === 0 && seconds === 0
-			? "Due now!"
-			: `${hours ? hours + "h " : ""}${minutes}m ${seconds}s`;
+	const hours = Math.floor(timeToNext / 3600);
+	const minutes = Math.floor((timeToNext % 3600) / 60);
+	const seconds = Math.floor(timeToNext % 60);
 
-	element.textContent = `Next: ${timeStr}`;
+	element.textContent = `Next: ${
+		hours ? hours + "h " : ""
+	}${minutes}m ${seconds}s`;
 }
 
 // Function to delete a reminder

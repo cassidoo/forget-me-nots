@@ -4,7 +4,6 @@ chrome.runtime.onInstalled.addListener(() => {
 		periodInMinutes: 1,
 		delayInMinutes: 0,
 	});
-	console.log("Main alarm created");
 });
 
 // Check reminders when alarm triggers
@@ -12,28 +11,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 	if (alarm.name === "checkReminders") {
 		const reminders = await getRemindersDue();
 		for (const reminder of reminders) {
-			try {
-				const notificationId = `reminder-${reminder.id}-${Date.now()}`;
-				await chrome.notifications.create(notificationId, {
-					type: "basic",
-					iconUrl: "/icons/icon128.png",
-					title: "Forget-me-not Reminder",
-					message: reminder.text,
-					priority: 2,
-					requireInteraction: false,
-				});
-
-				// Create an alarm to clear this specific notification
-				chrome.alarms.create(`clear-${notificationId}`, {
-					delayInMinutes: 0.2, // Clear after 12 seconds
-				});
-			} catch (error) {
-				console.error("Notification error:", error);
-			}
+			// Send to all tabs
+			const tabs = await chrome.tabs.query({});
+			tabs.forEach((tab) => {
+				chrome.tabs
+					.sendMessage(tab.id, {
+						type: "SHOW_REMINDER",
+						reminder: reminder,
+					})
+					.catch(() => {
+						// Ignore errors for inactive tabs
+					});
+			});
 		}
-	} else if (alarm.name.startsWith("clear-")) {
-		const notificationId = alarm.name.replace("clear-", "");
-		chrome.notifications.clear(notificationId);
 	}
 });
 
@@ -44,21 +34,43 @@ async function getRemindersDue() {
 			const currentTime = now.getHours() * 60 + now.getMinutes();
 			const lastNotified = result.lastNotified || {};
 
+			console.log("Checking reminders at:", now.toLocaleTimeString());
+
 			const dueReminders = (result.reminders || []).filter((reminder) => {
 				const [startHours, startMinutes] = reminder.timeWindowStart.split(":");
 				const [endHours, endMinutes] = reminder.timeWindowEnd.split(":");
 				const startTime = parseInt(startHours) * 60 + parseInt(startMinutes);
 				const endTime = parseInt(endHours) * 60 + parseInt(endMinutes);
-				const lastTime = lastNotified[reminder.id] || 0;
+				const lastTime =
+					lastNotified[reminder.id] || startTime - reminder.cadence;
 
+				// Check if within time window
 				const isInWindow = currentTime >= startTime && currentTime <= endTime;
-				const isDue = currentTime - lastTime >= reminder.cadence;
-				const isOnInterval = (currentTime - startTime) % reminder.cadence === 0;
 
-				return isInWindow && isDue && isOnInterval;
+				// Calculate minutes since start of day for last notification
+				const minutesSinceLastNotification =
+					currentTime >= lastTime
+						? currentTime - lastTime
+						: 24 * 60 - lastTime + currentTime;
+
+				// Check if enough time has passed since last notification
+				const isDue = minutesSinceLastNotification >= reminder.cadence;
+
+				console.log("Checking reminder:", {
+					text: reminder.text,
+					currentTime,
+					lastTime,
+					minutesSinceLastNotification,
+					cadence: reminder.cadence,
+					isInWindow,
+					isDue,
+				});
+
+				return isInWindow && isDue;
 			});
 
 			if (dueReminders.length > 0) {
+				// Update last notification times
 				const updates = {};
 				dueReminders.forEach((r) => (updates[r.id] = currentTime));
 				chrome.storage.local.set({
@@ -70,8 +82,3 @@ async function getRemindersDue() {
 		});
 	});
 }
-
-// Clear notifications on click
-chrome.notifications.onClicked.addListener((notificationId) => {
-	chrome.notifications.clear(notificationId);
-});

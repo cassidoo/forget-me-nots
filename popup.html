@@ -5,6 +5,9 @@
 		<link rel="stylesheet" type="text/css" href="popup.css" />
 	</head>
 	<body>
+		<div id="notification-banner" class="notification-banner">
+			<!-- Banner text will be inserted here -->
+		</div>
 		<div class="container">
 			<h1>Forget-me-nots</h1>
 
@@ -34,7 +37,7 @@
 
 					<div class="form-group">
 						<label for="cadence">Repeat Every (minutes):</label>
-						<input type="number" id="cadence" value="30" min="1" required />
+						<input type="number" id="cadence" value="30" min="0" required />
 					</div>
 
 					<button type="submit" class="button">Save Reminder</button>

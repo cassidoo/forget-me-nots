@@ -3,7 +3,7 @@
 	"name": "Forget-me-nots",
 	"version": "1.0",
 	"description": "A simple reminder extension to help you remember things throughout the day",
-	"permissions": ["storage", "alarms", "notifications"],
+	"permissions": ["storage", "alarms", "notifications", "tabs"],
 	"host_permissions": [],
 	"action": {
 		"default_popup": "popup.html",
@@ -20,5 +20,13 @@
 		"16": "icons/icon16.png",
 		"48": "icons/icon48.png",
 		"128": "icons/icon128.png"
-	}
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"css": ["content.css"],
+			"js": ["content.js"],
+			"run_at": "document_start"
+		}
+	]
 }
